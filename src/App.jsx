@@ -1,14 +1,13 @@
-import { Auth } from "./components/Auth";
+import Footer from "./components/Footer";
 import Header from "./components/Header";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
+import AllRoutes from "./routes/AllRoutes";
 
 function App() {
   return (
     <>
       <Header />
-      <Login />
-      <Home />
+      <AllRoutes />
+      <Footer />
     </>
   );
 }
