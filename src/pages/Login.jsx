@@ -44,7 +44,7 @@ export default function Login() {
             <Auth />
           </div>
         </form>
-      <a className="flex justify-center cursor-pointer hover:underline text-indigo-800" onClick={handleRegister}>New user...?</a>
+      <a className="flex justify-center cursor-pointer hover:underline text-indigo-800 hover:text-black" onClick={handleRegister}>New user...?</a>
       </div>
     </div>
   );
