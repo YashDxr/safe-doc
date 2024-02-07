@@ -1,11 +1,16 @@
-
+import { Auth } from "./components/Auth";
+import Header from "./components/Header";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
 
 function App() {
   return (
     <>
-      <h1 className="text-blue-500">Hello bro</h1>
+      <Header />
+      <Login />
+      <Home />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
