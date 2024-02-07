@@ -4,11 +4,13 @@ import AllRoutes from "./routes/AllRoutes";
 
 function App() {
   return (
-    <>
+    <div className="flex flex-col h-screen">
       <Header />
-      <AllRoutes />
+      {/* <div className="flex-1 overflow-hidden"> */}
+        <AllRoutes />
+      {/* </div> */}
       <Footer />
-    </>
+    </div>
   );
 }
 
