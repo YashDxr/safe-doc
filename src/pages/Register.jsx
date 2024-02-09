@@ -1,14 +1,37 @@
 import { Auth } from "../components/Auth";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+
 
 export default function Register() {
+  const [data, setData] = useState({});
   const navigate = useNavigate();
-  const handleSubmit = () => {
-    console.log("Submitted");
+  const handleChange = (e) => {
+    setData({ ...data, [e.target.id]: e.target.value });
+    // console.log(data);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/signup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const output = await res.json();
+      console.log(output);
+    } catch (err) {
+      console.log("Error", err);
+    }
   };
   const handleLogin = () => {
     navigate("/login");
   };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="max-w-md w-full bg-white shadow-md rounded-lg p-8">
@@ -16,12 +39,24 @@ export default function Register() {
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Email/Username
+              Username
+            </label>
+            <input
+              id="username"
+              className="mt-1 w-full border-2 border-black rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-3"
+              type="text"
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Email
             </label>
             <input
               id="email"
               className="mt-1 w-full border-2 border-black rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-3"
               type="text"
+              onChange={handleChange}
             />
           </div>
           <div>
@@ -32,6 +67,7 @@ export default function Register() {
               id="password"
               className="mt-1 w-full border-2 border-black rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-3"
               type="password"
+              onChange={handleChange}
             />
           </div>
           <div>
@@ -39,7 +75,7 @@ export default function Register() {
               Confirm Password
             </label>
             <input
-              id="password"
+              id="cpassword"
               className="mt-1 w-full border-2 border-black rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-3"
               type="password"
             />
