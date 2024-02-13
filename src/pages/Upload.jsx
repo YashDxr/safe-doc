@@ -20,15 +20,20 @@ export default function Upload() {
 
   const allDocumentRef = ref(storage, `documents/`);
   useEffect(() => {
-    listAll(allDocumentRef).then((docs) => {
-      docs.items.forEach((doc) => {
-        getDownloadURL(doc).then((url) => {
-          setDocList(...docList, url);
-        });
+    listAll(allDocumentRef)
+      .then((docs) => {
+        const promises = docs.items.map((doc) => getDownloadURL(doc));
+        return Promise.all(promises);
+      })
+      .then((urls) => {
+        setDocList(urls);
+      })
+      .catch((error) => {
+        console.error("Error fetching documents: ", error);
       });
-    });
   }, []);
 
+  const handleSync = () => {};
   return (
     <div className="container mx-auto py-8 flex flex-col items-center">
       <h1 className="text-3xl font-bold m-14">Upload Files</h1>
@@ -151,8 +156,11 @@ export default function Upload() {
             Upload
           </button>
         </div>
+        {docList.map((url, index) => (
+          <iframe key={index} src={url}></iframe>
+        ))}
       </div>
-      <button className="m-4 w-1/3 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
+      <button onClick={handleSync} className="m-4 w-1/3 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
         Sync
       </button>
     </div>
