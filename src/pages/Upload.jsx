@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { storage } from "../shared/firebase-config";
 import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
 import { v4 } from "uuid";
+import InputType from "../components/InputType";
 
 export default function Upload() {
   const [uploadMethod, setUploadMethod] = useState("device");
@@ -32,6 +33,7 @@ export default function Upload() {
         console.error("Error fetching documents: ", error);
       });
   }, []);
+
 
   const handleSync = () => {};
   return (
@@ -148,6 +150,15 @@ export default function Upload() {
             </div>
           </>
         )}
+        <div className="relative">
+          <label className="block text-lg font-medium mb-2">
+            Create a Key:
+          </label>
+          <div>
+            <InputType />
+          </div>
+        </div>
+
         <div className="flex justify-center">
           <button
             onClick={handleClick}
@@ -156,11 +167,14 @@ export default function Upload() {
             Upload
           </button>
         </div>
-        {docList.map((url, index) => (
+        {/* {docList.map((url, index) => (
           <iframe key={index} src={url}></iframe>
-        ))}
+        ))} */}
       </div>
-      <button onClick={handleSync} className="m-4 w-1/3 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300">
+      <button
+        onClick={handleSync}
+        className="m-4 w-1/3 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
+      >
         Sync
       </button>
     </div>
