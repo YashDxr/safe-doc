@@ -1,25 +1,63 @@
+import { useForm } from "react-hook-form";
 import { Auth } from "../components/Auth";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 export default function Login() {
+  const { register, handleSubmit } = useForm();
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-  const handleSubmit = () => {
-    console.log("Submitted");
+
+  useEffect(() => {
+    if(localStorage.getItem("user")){
+      navigate("/", { state: { username: localStorage.getItem("user") } })
+    }
+  }, []);
+
+  const onSubmit = async (formData) => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const output = await res.json();
+      console.log(output);
+      console.log("res",res);
+      if (res.ok) {
+        localStorage.setItem("user", output.username);
+        navigate("/" , { state: { username: output.username } });
+      } else {
+        setError(output.error); 
+      }
+    } catch (err) {
+      console.error("Error", err); 
+      setError("An unexpected error occurred."); 
+    }
   };
+
   const handleRegister = () => {
     navigate("/register");
   };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="max-w-md w-full bg-white shadow-md rounded-lg p-8">
         <h1 className="text-3xl mb-6 text-center text-gray-800">Login</h1>
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Email/Username
+              Email
             </label>
             <input
               id="email"
+              {...register("email")} 
               className="mt-1 w-full border-2 border-black rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-3"
               type="text"
             />
@@ -30,10 +68,15 @@ export default function Login() {
             </label>
             <input
               id="password"
+              {...register("password")} 
               className="mt-1 w-full border-2 border-black rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-3"
               type="password"
             />
           </div>
+          <div>
+            {error && <p className="text-red-500">{error}</p>}
+          </div>
+
           <div>
             <button
               type="submit"
