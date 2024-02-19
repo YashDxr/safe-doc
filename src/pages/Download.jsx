@@ -1,4 +1,12 @@
+import {useNavigate} from 'react-router-dom';
+import {useEffect } from 'react';
 export default function Download() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if(!localStorage.getItem("user")){
+      navigate("/login");
+    }
+  },[]);
   return (
     <div className="container mx-auto py-8 flex flex-col items-center">
       <h1 className="text-3xl font-bold m-14">Upload Files</h1>

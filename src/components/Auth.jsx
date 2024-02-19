@@ -34,6 +34,8 @@ export const Auth = () => {
     try {
       const user = await GithubAuth();
       if (user) {
+        localStorage.setItem("user", user.displayName);
+        navigate("/", { state: { username: user.displayName } });
         console.log(user.displayName);
       } else {
         console.log("Error in data");

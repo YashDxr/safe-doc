@@ -3,6 +3,7 @@ import { storage } from "../shared/firebase-config";
 import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
 import { v4 } from "uuid";
 import InputType from "../components/InputType";
+import { useNavigate } from "react-router-dom";
 
 export default function Upload() {
   const [uploadMethod, setUploadMethod] = useState("device");
@@ -10,6 +11,13 @@ export default function Upload() {
   const [name, setName] = useState("");
   const [docList, setDocList] = useState([]);
   const nameRef = useRef();
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!localStorage.getItem("user")) {
+      navigate("/login");
+    }
+  }, []);
 
   const handleClick = () => {
     if (document == null) return;
@@ -33,7 +41,6 @@ export default function Upload() {
         console.error("Error fetching documents: ", error);
       });
   }, []);
-
 
   const handleSync = () => {};
   return (

@@ -1,6 +1,14 @@
-import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if(!localStorage.getItem("user")){
+      navigate("/login");
+    }
+  },[]);
+  
   const location = useLocation();
   let username = "";
 
@@ -8,6 +16,8 @@ export default function Home() {
     username = location.state.username;
     localStorage.setItem("username", location.state.username);
   }
+
+
 
   return (
     <div className="min-h-screen p-10">
