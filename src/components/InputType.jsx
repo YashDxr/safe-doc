@@ -1,12 +1,13 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { generateAesKey } from "../services/GenerateKey";
 
-export default function InputType() {
+export default function InputType({ sendKey }) {
   const [visible, setVisible] = useState(false);
   const [inputType, setInputType] = useState("password");
+  const [key, setKey] = useState("");
 
   const keyRef = useRef();
 
@@ -19,9 +20,17 @@ export default function InputType() {
     navigator.clipboard.writeText(keyRef.current.value);
   };
 
+  useEffect(() => {
+    if (key.length > 0) {
+      console.log("Sending key...");
+      sendKey(key);
+    }
+  }, [key]);
+
   const handleKeyGeneration = () => {
-    const key = generateAesKey();
-    keyRef.current.value = key;
+    const AESkey = generateAesKey();
+    keyRef.current.value = AESkey;
+    setKey(AESkey);
   };
 
   return (

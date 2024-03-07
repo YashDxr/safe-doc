@@ -1,48 +1,84 @@
 import { useEffect, useRef, useState } from "react";
 import { storage } from "../shared/firebase-config";
-import { ref, uploadBytes, listAll, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes } from "firebase/storage";
 import { v4 } from "uuid";
 import InputType from "../components/InputType";
 import { useNavigate } from "react-router-dom";
+import { encryptData } from "./../services/Encryption.js";
+import CryptoJS from "crypto-js";
 
 export default function Upload() {
   const [uploadMethod, setUploadMethod] = useState("device");
   const [document, setDocument] = useState(null);
   const [name, setName] = useState("");
-  const [docList, setDocList] = useState([]);
+  const [AesKey, setAesKey] = useState("");
+  const [encryptedFile, setEncryptedFile] = useState(null);
   const nameRef = useRef();
-
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!localStorage.getItem("user")) {
       navigate("/login");
     }
   }, []);
 
+  useEffect(() => {
+    if (document && AesKey) {
+      console.log("Before: ", document);
+      console.log(typeof document, "|||", typeof AesKey);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = e.target.result;
+        const encryptedData = CryptoJS.AES.encrypt(data, AesKey).toString();
+        const encryptedBlob = new Blob([encryptedData], {
+          type: "application/pdf",
+        });
+        setEncryptedFile(encryptedBlob);
+      };
+      reader.readAsDataURL(document);
+      console.log("After: ", document);
+    }
+  }, [document, AesKey]);
+
+
+  useEffect(() => {
+    if (encryptedFile) {
+      console.log("Encrypted", encryptedFile);
+    }
+  }, [encryptedFile]);
+
+
+  useEffect(() => {
+    console.log("AESKEY recieved: ", AesKey);
+  }, [AesKey]);
+
+  const getKey = (key) => {
+    setAesKey(key);
+  };
+
   const handleClick = () => {
-    if (document == null) return;
+    if (document == null || encryptedFile == null) return;
     const docRef = ref(storage, `documents/${name + v4()}`);
     uploadBytes(docRef, document).then(() => {
       alert("Document uploaded successfully!");
     });
   };
 
-  const allDocumentRef = ref(storage, `documents/`);
-  useEffect(() => {
-    listAll(allDocumentRef)
-      .then((docs) => {
-        const promises = docs.items.map((doc) => getDownloadURL(doc));
-        return Promise.all(promises);
-      })
-      .then((urls) => {
-        setDocList(urls);
-      })
-      .catch((error) => {
-        console.error("Error fetching documents: ", error);
-      });
-  }, []);
+  // const allDocumentRef = ref(storage, `documents/`);
+  // useEffect(() => {
+  //   listAll(allDocumentRef)
+  //     .then((docs) => {
+  //       const promises = docs.items.map((doc) => getDownloadURL(doc));
+  //       return Promise.all(promises);
+  //     })
+  //     .then((urls) => {
+  //       setDocList(urls);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error fetching documents: ", error);
+  //     });
+  // }, []);
 
-  const handleSync = () => {};
   return (
     <div className="container mx-auto py-8 flex flex-col items-center">
       <h1 className="text-3xl font-bold m-14">Upload Files</h1>
@@ -162,7 +198,7 @@ export default function Upload() {
             Create a Key:
           </label>
           <div>
-            <InputType />
+            <InputType sendKey={getKey} />
           </div>
         </div>
 
@@ -178,12 +214,15 @@ export default function Upload() {
           <iframe key={index} src={url}></iframe>
         ))} */}
       </div>
-      <button
-        onClick={handleSync}
-        className="m-4 w-1/3 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
-      >
-        Sync
-      </button>
+      {encryptedFile && <div>
+        <p>Encrypted File:</p>
+        <a
+          href={URL.createObjectURL(encryptedFile)}
+          download={`${name}.pdf`}
+        >
+          Download Encrypted File
+        </a>
+      </div>}
     </div>
   );
 }
