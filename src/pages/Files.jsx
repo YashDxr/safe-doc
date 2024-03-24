@@ -7,16 +7,9 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import MailIcon from "@mui/icons-material/Mail";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { useState, useEffect } from "react";
-import {useNavigate} from 'react-router-dom'
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 export default function Files() {
-
-  const navigate = useNavigate();
-  useEffect(() => {
-    if(!localStorage.getItem("user")){
-      navigate("/login");
-    }
-  },[]);
   const [copiedItem, setCopiedItem] = useState(null);
   const files = [
     { name: "File1", url: "https://google.com" },
@@ -29,6 +22,13 @@ export default function Files() {
     { name: "File8", url: "https://youtube.com" },
     { name: "File9", url: "https://instagram.com" },
   ];
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!localStorage.getItem("user")) {
+      navigate("/login");
+    }
+  }, []);
 
   const handleClick = (index, url) => {
     setCopiedItem(index);

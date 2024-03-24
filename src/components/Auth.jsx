@@ -8,19 +8,33 @@ import { useEffect } from "react";
 export const Auth = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (localStorage.getItem("user")) {
-      navigate("/");
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (localStorage.getItem("user")) {
+  //     navigate("/");
+  //   }
+  // }, []);
   const handleGoogleClick = async (e) => {
     e.preventDefault();
     try {
       const user = await GoogleAuth();
-      if (user) {
-        localStorage.setItem("user", user.displayName);
-        navigate("/", { state: { username: user.displayName } });
-        console.log(user.displayName);
+      console.log("Auth: ", user);
+
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/google`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: user.displayName, email: user.email }),
+        }
+      );
+      const data = await res.json();
+      console.log("data: ", data);
+      if (data) {
+        localStorage.setItem("user", data.username);
+        navigate("/", { state: { username: data.username } });
+        console.log(data.username);
       } else {
         console.log("Error in data");
       }

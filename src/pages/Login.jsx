@@ -9,8 +9,8 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if(localStorage.getItem("user")){
-      navigate("/", { state: { username: localStorage.getItem("user") } })
+    if (localStorage.getItem("user")) {
+      navigate("/");
     }
   }, []);
 
@@ -29,16 +29,16 @@ export default function Login() {
 
       const output = await res.json();
       console.log(output);
-      console.log("res",res);
+      console.log(output.user.username);
       if (res.ok) {
-        localStorage.setItem("user", output.username);
-        navigate("/" , { state: { username: output.username } });
+        localStorage.setItem("user", output.user.username);
+        navigate("/");
       } else {
-        setError(output.error); 
+        setError(output.error);
       }
     } catch (err) {
-      console.error("Error", err); 
-      setError("An unexpected error occurred."); 
+      console.error("Error", err);
+      setError("An unexpected error occurred.");
     }
   };
 
@@ -57,7 +57,7 @@ export default function Login() {
             </label>
             <input
               id="email"
-              {...register("email")} 
+              {...register("email")}
               className="mt-1 w-full border-2 border-black rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-3"
               type="text"
             />
@@ -68,14 +68,12 @@ export default function Login() {
             </label>
             <input
               id="password"
-              {...register("password")} 
+              {...register("password")}
               className="mt-1 w-full border-2 border-black rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-3"
               type="password"
             />
           </div>
-          <div>
-            {error && <p className="text-red-500">{error}</p>}
-          </div>
+          <div>{error && <p className="text-red-500">{error}</p>}</div>
 
           <div>
             <button

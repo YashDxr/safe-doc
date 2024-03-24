@@ -4,20 +4,19 @@ import { useLocation, useNavigate } from "react-router-dom";
 export default function Home() {
   const navigate = useNavigate();
   useEffect(() => {
-    if(!localStorage.getItem("user")){
+    if (!localStorage.getItem("user")) {
       navigate("/login");
     }
-  },[]);
-  
-  const location = useLocation();
-  let username = "";
+  }, []);
 
-  if (location && location.state) {
-    username = location.state.username;
-    localStorage.setItem("username", location.state.username);
-  }
+  // const location = useLocation();
+  let username = localStorage.getItem("user");
 
-
+  // if (location && location.state) {
+  //   console.log("Location:", location);
+  //   username = location.state.username;
+  //   localStorage.setItem("username", location.state.username);
+  // }
 
   return (
     <div className="min-h-screen p-10">
@@ -46,17 +45,17 @@ export default function Home() {
             Safe-Doc offers a secure and intuitive platform for storing,
             accessing, and managing sensitive data on the cloud. With Safe-Doc,
             users can upload their documents with confidence, knowing that each
-            file undergoes rigorous encryption before being stored, ensuring
-            the utmost privacy and confidentiality. Whether it's accessing files
-            on the go, collaborating with colleagues, or sharing documents
-            securely with clients, Safe-Doc provides a seamless and efficient
-            solution tailored to the modern user's needs. From its intuitive
-            interface to its robust security features, Safe-Doc is poised to
-            revolutionize the way individuals and businesses manage their
-            documents, offering peace of mind and unparalleled control over
-            digital assets. Say goodbye to the hassles of traditional document
-            management and embrace the future of secure and efficient data
-            handling with Safe-Doc.
+            file undergoes rigorous encryption before being stored, ensuring the
+            utmost privacy and confidentiality. Whether it's accessing files on
+            the go, collaborating with colleagues, or sharing documents securely
+            with clients, Safe-Doc provides a seamless and efficient solution
+            tailored to the modern user's needs. From its intuitive interface to
+            its robust security features, Safe-Doc is poised to revolutionize
+            the way individuals and businesses manage their documents, offering
+            peace of mind and unparalleled control over digital assets. Say
+            goodbye to the hassles of traditional document management and
+            embrace the future of secure and efficient data handling with
+            Safe-Doc.
           </p>
 
           <h1 className="text-3xl font-semibold text-gray-800 mb-4 font-serif">

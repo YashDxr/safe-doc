@@ -13,7 +13,7 @@ export default function Download() {
 
   return (
     <div className="container mx-auto py-8 flex flex-col items-center">
-      <h1 className="text-3xl font-bold m-14">Upload Files</h1>
+      <h1 className="text-3xl font-bold m-14">Download File</h1>
       <div className="w-1/2 bg-white p-6 rounded-lg shadow-md">
         <div>
           <label htmlFor="fileLink" className="block text-lg font-medium mb-2">

@@ -1,18 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { storage } from "../shared/firebase-config";
-import { ref, uploadBytes } from "firebase/storage";
-import { v4 } from "uuid";
 import InputType from "../components/InputType";
 import { useNavigate } from "react-router-dom";
-import { encryptData } from "./../services/Encryption.js";
-import CryptoJS from "crypto-js";
+import encryptAndDecryptFile from "../services/Encryption";
 
 export default function Upload() {
-  const [uploadMethod, setUploadMethod] = useState("device");
   const [document, setDocument] = useState(null);
   const [name, setName] = useState("");
-  const [AesKey, setAesKey] = useState("");
-  const [encryptedFile, setEncryptedFile] = useState(null);
+  const [aesKey, setAesKey] = useState("");
+  const [encryptedUrl, setEncryptedUrl] = useState("");
+  const [decryptedUrl, setDecryptedUrl] = useState("");
   const nameRef = useRef();
   const navigate = useNavigate();
 
@@ -22,62 +18,27 @@ export default function Upload() {
     }
   }, []);
 
-  useEffect(() => {
-    if (document && AesKey) {
-      console.log("Before: ", document);
-      console.log(typeof document, "|||", typeof AesKey);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const data = e.target.result;
-        const encryptedData = CryptoJS.AES.encrypt(data, AesKey).toString();
-        const encryptedBlob = new Blob([encryptedData], {
-          type: "application/pdf",
-        });
-        setEncryptedFile(encryptedBlob);
-      };
-      reader.readAsDataURL(document);
-      console.log("After: ", document);
-    }
-  }, [document, AesKey]);
-
-
-  useEffect(() => {
-    if (encryptedFile) {
-      console.log("Encrypted", encryptedFile);
-    }
-  }, [encryptedFile]);
-
-
-  useEffect(() => {
-    console.log("AESKEY recieved: ", AesKey);
-  }, [AesKey]);
-
   const getKey = (key) => {
     setAesKey(key);
   };
 
-  const handleClick = () => {
-    if (document == null || encryptedFile == null) return;
-    const docRef = ref(storage, `documents/${name + v4()}`);
-    uploadBytes(docRef, document).then(() => {
-      alert("Document uploaded successfully!");
-    });
-  };
+  const handleClick = async () => {
+    if (!document || !name || !aesKey) {
+      alert("Please provide all necessary information.");
+      return;
+    }
 
-  // const allDocumentRef = ref(storage, `documents/`);
-  // useEffect(() => {
-  //   listAll(allDocumentRef)
-  //     .then((docs) => {
-  //       const promises = docs.items.map((doc) => getDownloadURL(doc));
-  //       return Promise.all(promises);
-  //     })
-  //     .then((urls) => {
-  //       setDocList(urls);
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error fetching documents: ", error);
-  //     });
-  // }, []);
+    try {
+      const { encryptedUrl, decryptedUrl } = await encryptAndDecryptFile(
+        document,
+        aesKey
+      );
+      setEncryptedUrl(encryptedUrl);
+      setDecryptedUrl(decryptedUrl);
+    } catch (error) {
+      console.error("Error encrypting and decrypting file:", error);
+    }
+  };
 
   return (
     <div className="container mx-auto py-8 flex flex-col items-center">
@@ -94,105 +55,27 @@ export default function Upload() {
             setName(nameRef.current.value);
           }}
         />
-        <div className="mb-4">
-          <label className="block text-lg font-medium mb-2">
-            Select upload method:
-          </label>
+
+        <>
           <div>
-            <label className="inline-flex items-center">
-              <input
-                type="radio"
-                value="device"
-                checked={uploadMethod === "device"}
-                onChange={() => setUploadMethod("device")}
-                className="form-radio"
-              />
-              <span className="ml-2">Upload from device</span>
+            <label
+              htmlFor="fileInput"
+              className="block text-lg font-medium mb-2"
+            >
+              Upload from your device:
             </label>
-            <label className="inline-flex items-center ml-4">
-              <input
-                type="radio"
-                value="link"
-                checked={uploadMethod === "link"}
-                onChange={() => setUploadMethod("link")}
-                className="form-radio"
-              />
-              <span className="ml-2">Paste link</span>
-            </label>
+            <input
+              onChange={(e) => {
+                setDocument(e.target.files[0]);
+              }}
+              type="file"
+              id="fileInput"
+              accept=".pdf"
+              className="w-full border border-gray-300 p-2 rounded-md mb-4"
+            />
           </div>
-        </div>
+        </>
 
-        {uploadMethod === "device" && (
-          <>
-            <div>
-              <label
-                htmlFor="fileInput"
-                className="block text-lg font-medium mb-2"
-              >
-                Upload from your device:
-              </label>
-              <input
-                onChange={(e) => {
-                  setDocument(e.target.files[0]);
-                }}
-                type="file"
-                id="fileInput"
-                accept="images/* , .pdf"
-                className="w-full border border-gray-300 p-2 rounded-md mb-4"
-                disabled={uploadMethod !== "device"}
-              />
-            </div>
-            <div className="text-slate-200 cursor-not-allowed">
-              <label
-                htmlFor="fileLink"
-                className="block text-lg font-medium mb-2 cursor-not-allowed"
-              >
-                Paste a link:
-              </label>
-              <input
-                type="text"
-                id="fileLink"
-                className="w-full border border-gray-300 p-2 rounded-md mb-4 cursor-not-allowed"
-                placeholder="https://example.com/file.pdf"
-                disabled={uploadMethod !== "link"}
-              />
-            </div>
-          </>
-        )}
-
-        {uploadMethod === "link" && (
-          <>
-            <div className="text-slate-200 cursor-not-allowed">
-              <label
-                htmlFor="fileInput"
-                className="block text-lg font-medium mb-2 cursor-not-allowed"
-              >
-                Upload from your device:
-              </label>
-              <input
-                type="file"
-                id="fileInput"
-                className="w-full border border-gray-300 p-2 rounded-md mb-4 cursor-not-allowed"
-                disabled={uploadMethod !== "device"}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="fileLink"
-                className="block text-lg font-medium mb-2"
-              >
-                Paste a link:
-              </label>
-              <input
-                type="text"
-                id="fileLink"
-                className="w-full border border-gray-300 p-2 rounded-md mb-4"
-                placeholder="https://example.com/file.pdf"
-                disabled={uploadMethod !== "link"}
-              />
-            </div>
-          </>
-        )}
         <div className="relative">
           <label className="block text-lg font-medium mb-2">
             Create a Key:
@@ -210,19 +93,26 @@ export default function Upload() {
             Upload
           </button>
         </div>
-        {/* {docList.map((url, index) => (
-          <iframe key={index} src={url}></iframe>
-        ))} */}
+
+        {encryptedUrl && decryptedUrl && (
+          <div className="flex justify-center mt-4">
+            <a
+              href={encryptedUrl}
+              download={`${name}_encrypted.pdf`}
+              className="text-blue-500 underline mr-4"
+            >
+              Download Encrypted File
+            </a>
+            <a
+              href={decryptedUrl}
+              download={`${name}_decrypted.pdf`}
+              className="text-blue-500 underline"
+            >
+              Download Decrypted File
+            </a>
+          </div>
+        )}
       </div>
-      {encryptedFile && <div>
-        <p>Encrypted File:</p>
-        <a
-          href={URL.createObjectURL(encryptedFile)}
-          download={`${name}.pdf`}
-        >
-          Download Encrypted File
-        </a>
-      </div>}
     </div>
   );
 }
