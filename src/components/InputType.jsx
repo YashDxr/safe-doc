@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { generateAesKey } from "../services/GenerateKey";
+import { generateAesKey, exportAesKey } from "../services/GenerateKey";
 
 export default function InputType({ sendKey }) {
   const [visible, setVisible] = useState(false);
@@ -27,10 +27,11 @@ export default function InputType({ sendKey }) {
     }
   }, [key]);
 
-  const handleKeyGeneration = () => {
-    const AESkey = generateAesKey();
-    keyRef.current.value = AESkey;
-    setKey(AESkey);
+  const handleKeyGeneration = async () => {
+    const AESkey = await generateAesKey();
+    const exportedKey = await exportAesKey(AESkey);
+    keyRef.current.value = exportedKey;
+    setKey(exportedKey);
   };
 
   return (

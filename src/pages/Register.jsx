@@ -1,8 +1,6 @@
 import { Auth } from "../components/Auth";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 export default function Register() {
   const {
@@ -12,13 +10,6 @@ export default function Register() {
     getValues,
   } = useForm();
   const navigate = useNavigate();
-  const toastOptions = {
-    position: "bottom-right",
-    autoClose: 8000,
-    pauseOnHover: true,
-    draggable: true,
-    theme: 'dark',
-  }
 
   const onSubmit = async (formData) => {
     try {
@@ -166,7 +157,6 @@ export default function Register() {
           Existing user...?
         </a>
       </div>
-      <ToastContainer />
     </div>
   );
 }
