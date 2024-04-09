@@ -32,6 +32,7 @@ export default function Login() {
       console.log(output.user.username);
       if (res.ok) {
         localStorage.setItem("user", output.user.username);
+
         navigate("/");
       } else {
         setError(output.error);

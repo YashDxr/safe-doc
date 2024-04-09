@@ -38,6 +38,7 @@ export default function InputType({ sendKey }) {
     <div className="flex flex-col">
       <div className="flex items-center w-full">
         <input
+          onChange={(e) => setKey(keyRef.current.value)}
           ref={keyRef}
           type={inputType}
           id="filePassword"

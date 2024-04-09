@@ -7,6 +7,9 @@ export default function Home() {
     if (!localStorage.getItem("user")) {
       navigate("/login");
     }
+    if (localStorage.getItem("verified")) {
+      localStorage.removeItem("verified");
+    }
   }, []);
 
   // const location = useLocation();
