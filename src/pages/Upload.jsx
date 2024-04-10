@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import InputType from "../components/InputType";
 import { useNavigate } from "react-router-dom";
+import BounceLoader from "react-spinners/BounceLoader";
 
 export default function Upload() {
   const [document, setDocument] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [aesKey, setAesKey] = useState("");
   const nameRef = useRef();
@@ -24,6 +26,7 @@ export default function Upload() {
 
   const handleClick = async (e) => {
     e.preventDefault();
+    setLoading(true);
     if (!document || !name || aesKey.length < 32) {
       // alert("Please provide all necessary information.");
       if (!document) console.log("Doc");
@@ -70,6 +73,8 @@ export default function Upload() {
         console.log("ERROR in saving");
       }
 
+      setLoading(false);
+      alert("File uploaded successfully!");
       console.log("Success in saving: ", res);
 
       // const blob = await response.blob();
@@ -80,6 +85,7 @@ export default function Upload() {
       // window.open(fileUrl, "_blank");
     } catch (error) {
       console.error("Error:", error.message);
+      setLoading(false);
     }
   };
 
@@ -131,14 +137,24 @@ export default function Upload() {
           </div>
         </div>
 
-        <div className="flex justify-center">
-          <button
-            onClick={handleClick}
-            className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
-          >
-            Encrypt & Upload
-          </button>
-        </div>
+        {loading ? (
+          <div className="flex justify-center">
+            <button
+              className="bg-blue-500  text-white py-4 px-8 rounded-md hover:bg-blue-600 transition duration-300"
+            >
+              Loading...
+            </button>
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <button
+              onClick={handleClick}
+              className="bg-blue-500  text-white py-4 px-8 rounded-md hover:bg-blue-600 transition duration-300"
+            >
+              Encrypt & Upload
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

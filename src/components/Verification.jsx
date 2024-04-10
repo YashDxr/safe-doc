@@ -8,6 +8,8 @@ export default function Verification() {
   const [message, setMessage] = useState("");
   const [otp, setOtp] = useState("");
   const [otpBox, setOtpBox] = useState(false);
+  const [loadingOtp, setLoadingOtp] = useState(false);
+  const [loadingVerification, setLoadingVerification] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -19,6 +21,7 @@ export default function Verification() {
 
   const handleverifyUser = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const username = localStorage.getItem("user");
     try {
       const res = await fetch(
@@ -34,8 +37,11 @@ export default function Verification() {
 
       if (res.ok) {
         const data = await res.json();
-        setEmail(data);
-        setClicked(true);
+        setTimeout(() => {
+          setEmail(data);
+          setClicked(true);
+          setLoading(false);
+        }, 2000);
       } else {
         console.log("Error:", res.statusText);
       }
@@ -46,6 +52,7 @@ export default function Verification() {
 
   const handleverifyOtp = async (e) => {
     e.preventDefault();
+    setLoadingVerification(true);
     const username = localStorage.getItem("user");
     try {
       const res = await fetch(
@@ -58,13 +65,17 @@ export default function Verification() {
           body: JSON.stringify({ username, otp }),
         }
       );
-      console.log("RES: ",res);
+      console.log("RES: ", res);
       if (res.ok) {
         console.log("Success: ", res);
         localStorage.setItem("verified", true);
-        navigate("/keystore");
+        setTimeout(() => {
+          setLoadingVerification(false);
+          navigate("/keystore");
+        }, 1500);
       } else {
         console.log("Error: ", res);
+        setLoadingVerification(false);
         // console.log("Error:", res.statusText);
       }
     } catch (error) {
@@ -75,7 +86,7 @@ export default function Verification() {
   const handleGenerateOtp = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
+      setLoadingOtp(true);
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/private/reqOtp/${email}`,
         {
@@ -83,7 +94,7 @@ export default function Verification() {
         }
       );
       if (res.ok) {
-        setLoading(false);
+        setLoadingOtp(false);
         setMessage("OTP sent successfully. Please check your email.");
         setOtpBox(true);
       } else {
@@ -135,7 +146,7 @@ export default function Verification() {
                     className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2"
                     onClick={handleGenerateOtp}
                   >
-                    {loading ? "Loading..." : "Generate OTP"}
+                    {loadingOtp ? "Generating..." : "Generate OTP"}
                   </button>
                 </div>
               </div>
@@ -154,21 +165,33 @@ export default function Verification() {
 
           {clicked ? (
             <div>
-              <button
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2"
-                onClick={handleverifyOtp}
-              >
-                Verify OTP
-              </button>
+              {loadingVerification ? (
+                <button className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2">
+                  Verifying...
+                </button>
+              ) : (
+                <button
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2"
+                  onClick={handleverifyOtp}
+                >
+                  Verify OTP
+                </button>
+              )}
             </div>
           ) : (
             <div>
-              <button
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2"
-                onClick={handleverifyUser}
-              >
-                Verify User
-              </button>
+              {loading ? (
+                <button className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2">
+                  Checking Credentials...
+                </button>
+              ) : (
+                <button
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2"
+                  onClick={handleverifyUser}
+                >
+                  Verify User
+                </button>
+              )}
             </div>
           )}
         </form>

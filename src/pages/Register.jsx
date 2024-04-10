@@ -1,6 +1,8 @@
 import { Auth } from "../components/Auth";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
+import BarLoader from "react-spinners/BarLoader";
 
 export default function Register() {
   const {
@@ -9,9 +11,11 @@ export default function Register() {
     formState: { errors, isSubmitting },
     getValues,
   } = useForm();
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const onSubmit = async (formData) => {
+    setLoading(true);
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/auth/signup`,
@@ -26,8 +30,11 @@ export default function Register() {
 
       const output = await res.json();
       console.log(output);
-      alert("Registration Successful. Please log in to continue...");
-      navigate("/login");
+      setTimeout(() => {
+        setLoading(false);
+        alert("Registration Successful. Please log in to continue...");
+        navigate("/login");
+      }, 3000);
     } catch (err) {
       console.log("Error", err);
     }
@@ -139,16 +146,22 @@ export default function Register() {
                 </span>
               )}
           </div>
-          <div>
-            <button
-              type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Submitting..." : "Register"}
+          {loading ? (
+            <button className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2">
+              <BarLoader color="#36d7b7" />
             </button>
-            <Auth />
-          </div>
+          ) : (
+            <div>
+              <button
+                type="submit"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Submitting..." : "Register"}
+              </button>
+              <Auth />
+            </div>
+          )}
         </form>
         <a
           className="flex justify-center cursor-pointer hover:underline text-indigo-800 hover:text-black"

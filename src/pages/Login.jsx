@@ -2,10 +2,12 @@ import { useForm } from "react-hook-form";
 import { Auth } from "../components/Auth";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import BarLoader from "react-spinners/BarLoader";
 
 export default function Login() {
   const { register, handleSubmit } = useForm();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,6 +17,7 @@ export default function Login() {
   }, []);
 
   const onSubmit = async (formData) => {
+    setLoading(true);
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/auth/login`,
@@ -32,14 +35,22 @@ export default function Login() {
       console.log(output.user.username);
       if (res.ok) {
         localStorage.setItem("user", output.user.username);
-
-        navigate("/");
+        setTimeout(() => {
+          setLoading(false);
+          navigate("/");
+        }, 3000);
       } else {
-        setError(output.error);
+        setTimeout(() => {
+          setLoading(false);
+          setError(output.error);
+        }, 3000);
       }
     } catch (err) {
-      console.error("Error", err);
-      setError("An unexpected error occurred.");
+      setTimeout(() => {
+        setLoading(false);
+        console.log(err);
+        setError("Invalid Credentials");
+      }, 3000);
     }
   };
 
@@ -75,16 +86,21 @@ export default function Login() {
             />
           </div>
           <div>{error && <p className="text-red-500">{error}</p>}</div>
-
-          <div>
-            <button
-              type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2"
-            >
-              Login
+          {loading ? (
+            <button className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2">
+              <BarLoader color="#36d7b7" />
             </button>
-            <Auth />
-          </div>
+          ) : (
+            <div>
+              <button
+                type="submit"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2"
+              >
+                Login
+              </button>
+              <Auth />
+            </div>
+          )}
         </form>
         <a
           className="flex justify-center cursor-pointer hover:underline text-indigo-800 hover:text-black"

@@ -24,7 +24,7 @@ const KeyManagement = () => {
       );
 
       if (!res.ok) {
-        console.log("ERROR in saving");
+        console.log("ERROR in saving", res);
       }
 
       const data = await res.json();
@@ -40,7 +40,7 @@ const KeyManagement = () => {
 
       setKeysData(initialKeysData);
     } catch (error) {
-      console.log("ERROR in stores");
+      console.log("ERROR in stores", error);
     }
   };
 

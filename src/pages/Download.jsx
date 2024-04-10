@@ -58,7 +58,7 @@ export default function Download() {
       <div className="w-1/2 bg-white p-6 rounded-lg shadow-md">
         <div>
           <label htmlFor="fileLink" className="block text-lg font-medium mb-2">
-            Paste a link: || Filename
+            Filename
           </label>
           <input
             type="text"
@@ -91,7 +91,7 @@ export default function Download() {
         <div className="flex justify-center">
           <button
             onClick={handleDownload}
-            className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300 ml-4"
+            className="bg-blue-500 text-white py-4 px-8 rounded-md hover:bg-blue-600 transition duration-300 ml-4"
           >
             Decrypt & Download
           </button>

@@ -12,11 +12,13 @@ import { useNavigate } from "react-router-dom";
 import { Worker } from "@react-pdf-viewer/core";
 import { Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
+import GridLoader from "react-spinners/GridLoader";
 
 export default function Files() {
   const [files, setFiles] = useState([]);
   const [docFileUrl, setDocFileUrl] = useState("");
   const [copiedItem, setCopiedItem] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -30,6 +32,7 @@ export default function Files() {
   }, []);
 
   const getFiles = async () => {
+    setLoading(true);
     const username = localStorage.getItem("user");
     try {
       const res = await fetch(
@@ -47,9 +50,13 @@ export default function Files() {
       console.log("2: ", data.user);
       console.log("3: ", data.user.files);
 
-      setFiles(data.user.files);
+      setTimeout(() => {
+        setFiles(data.user.files);
+        setLoading(false);
+      }, 1500);
     } catch (err) {
       console.log(" Files Error: ", err);
+      setLoading(false);
     }
   };
 
@@ -111,54 +118,64 @@ export default function Files() {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold m-4">All Files</h1>
-      <div className="border border-black rounded-lg shadow-lg p-4 m-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {files.map((file, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-lg font-semibold mb-2">{file.filename}</h2>
-              <div className="flex justify-between items-center">
-                <a
-                  onClick={() => viewFiles(file.filename)}
-                  className="mt-4 block text-blue-500 hover:underline cursor-pointer"
-                >
-                  View File
-                </a>
-                <div className="flex items-center">
-                  {copiedItem === index ? (
-                    <div>Copied</div>
-                  ) : (
-                    <div
-                      className="mr-4 cursor-pointer"
-                      onClick={() => handleClick(index, docFileUrl)}
-                    >
-                      <ContentCopyIcon />
-                    </div>
-                  )}
+      {loading ? (
+        <div className="flex flex-col justify-center items-center align-middle">
+          <h1 className="text-3xl font-bold m-4">Fetching your documents...</h1>
+          <GridLoader color="#36d7b7" />
+        </div>
+      ) : (
+        <div className="border border-black rounded-lg shadow-lg p-4 m-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {files.map((file, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-lg font-semibold mb-2">{file.filename}</h2>
+                <div className="flex justify-between items-center">
+                  <a
+                    onClick={() => viewFiles(file.filename)}
+                    className="mt-4 block text-blue-500 hover:underline cursor-pointer"
+                  >
+                    View File
+                  </a>
+                  <div className="flex items-center">
+                    {copiedItem === index ? (
+                      <div>Copied</div>
+                    ) : (
+                      <div
+                        className="mr-4 cursor-pointer"
+                        onClick={() => handleClick(index, docFileUrl)}
+                      >
+                        <ContentCopyIcon />
+                      </div>
+                    )}
 
-                  <div className="mr-4">
-                    <WhatsappShareButton url={docFileUrl}>
-                      <WhatsAppIcon />
-                    </WhatsappShareButton>
-                  </div>
-                  <div className="mr-4">
-                    <FacebookShareButton url={docFileUrl}>
-                      <FacebookIcon />
-                    </FacebookShareButton>
-                  </div>
-                  <div>
-                    <EmailShareButton url={docFileUrl}>
-                      <MailIcon />
-                    </EmailShareButton>
+                    <div className="mr-4">
+                      <WhatsappShareButton url={docFileUrl}>
+                        <WhatsAppIcon />
+                      </WhatsappShareButton>
+                    </div>
+                    <div className="mr-4">
+                      <FacebookShareButton url={docFileUrl}>
+                        <FacebookIcon />
+                      </FacebookShareButton>
+                    </div>
+                    <div>
+                      <EmailShareButton url={docFileUrl}>
+                        <MailIcon />
+                      </EmailShareButton>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       {docFileUrl && (
-        <div className="my-8 mx-auto" style={{ width: "100%", maxWidth: "800px" }}>
-          <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
+        <div
+          className="my-8 mx-auto"
+          style={{ width: "100%", maxWidth: "800px" }}
+        >
+          <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
             <Viewer
               fileUrl={docFileUrl}
               style={{ border: "1px solid #333", height: "600px" }}
