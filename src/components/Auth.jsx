@@ -3,16 +3,10 @@ import { GithubAuth } from "../services/GithubAuth";
 import GoogleButton from "react-google-button";
 import GithubButton from "react-github-login-button";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 
 export const Auth = () => {
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   if (localStorage.getItem("user")) {
-  //     navigate("/");
-  //   }
-  // }, []);
   const handleGoogleClick = async (e) => {
     e.preventDefault();
     try {

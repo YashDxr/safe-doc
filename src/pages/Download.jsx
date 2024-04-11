@@ -2,8 +2,10 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function Download() {
-  const [name, setName] = useState("");
+  const [url, setUrl] = useState("");
   const [aesKey, setAesKey] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -16,37 +18,35 @@ export default function Download() {
   }, []);
 
   const handleDownload = async () => {
-    console.log("Started...");
-    if (!name || !aesKey) {
+    setLoading(true);
+    if (!url || !aesKey) {
       alert("Please provide all necessary information.");
       return;
     }
-    const username = localStorage.getItem("user");
     try {
-      // Make a POST request to your backend decryptFile endpoint
-      console.log("Fetch...");
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/files/decrypt`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, name, aesKey }),
-        }
-      );
-      console.log("Response...");
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ aesKey }),
+      });
       if (!response.ok) {
-        const errorMessage = await response.text();
-        throw new Error(`Failed to decrypt file: ${errorMessage}`);
+        const errorOutput = await response.json();
+        setLoading(false);
+        setError(errorOutput.error);
+        // const errorMessage = await response.text();
+        // throw new Error(`Failed to decrypt file: ${errorMessage}`);
+        return;
       }
 
       const blob = await response.blob();
 
       const fileUrl = URL.createObjectURL(blob);
-      console.log("URL...", fileUrl);
+      setLoading(false);
       window.open(fileUrl, "_blank");
     } catch (error) {
+      setLoading(false);
       console.error("Error decrypting and retrieving file:", error);
       alert("Failed to decrypt file. Please try again.");
     }
@@ -58,17 +58,16 @@ export default function Download() {
       <div className="w-1/2 bg-white p-6 rounded-lg shadow-md">
         <div>
           <label htmlFor="fileLink" className="block text-lg font-medium mb-2">
-            Filename
+            File URL
           </label>
           <input
             type="text"
             id="file"
             className="w-full border border-gray-300 p-2 rounded-md mb-4"
             onChange={(e) => {
-              setName(e.target.value);
-              console.log(e.target.value);
+              setUrl(e.target.value);
             }}
-            // placeholder="https://example.com/file.pdf"
+            placeholder="https://example.com/xyz/abc"
           />
         </div>
 
@@ -83,19 +82,32 @@ export default function Download() {
             placeholder="Key..."
             onChange={(e) => {
               setAesKey(e.target.value);
-              console.log(e.target.value);
             }}
           />
         </div>
-
-        <div className="flex justify-center">
-          <button
-            onClick={handleDownload}
-            className="bg-blue-500 text-white py-4 px-8 rounded-md hover:bg-blue-600 transition duration-300 ml-4"
-          >
-            Decrypt & Download
-          </button>
-        </div>
+        {loading ? (
+          <div className="flex justify-center">
+            <button className="bg-blue-500  text-white py-4 px-8 rounded-md hover:bg-blue-600 transition duration-300">
+              Loading...
+            </button>
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <button
+              onClick={handleDownload}
+              className="bg-blue-500 text-white py-4 px-8 rounded-md hover:bg-blue-600 transition duration-300 ml-4"
+            >
+              Decrypt & Download
+            </button>
+          </div>
+        )}
+        {error.length > 0 ? (
+          <div className="flex justify-center">
+            <span className="text-red-500 text-xl">{error}</span>
+          </div>
+        ) : (
+          <span></span>
+        )}
       </div>
     </div>
   );

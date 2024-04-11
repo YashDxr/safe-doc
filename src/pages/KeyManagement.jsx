@@ -5,6 +5,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 const KeyManagement = () => {
   const navigate = useNavigate();
   const [keysData, setKeysData] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!localStorage.getItem("verified")) {
@@ -14,6 +15,7 @@ const KeyManagement = () => {
   }, [navigate]);
 
   const getData = async () => {
+    setError("");
     const user = localStorage.getItem("user");
     try {
       const res = await fetch(
@@ -24,11 +26,12 @@ const KeyManagement = () => {
       );
 
       if (!res.ok) {
-        console.log("ERROR in saving", res);
+        const outputError = await res.json();
+        setError(outputError.error);
+        return;
       }
 
       const data = await res.json();
-      console.log("Success: ", data);
 
       const { filenames } = data;
 
@@ -40,13 +43,13 @@ const KeyManagement = () => {
 
       setKeysData(initialKeysData);
     } catch (error) {
-      console.log("ERROR in stores", error);
+      setError(error);
     }
   };
 
   const handleShowKey = async (filename, index) => {
     const username = localStorage.getItem("user");
-    const password = "705224@Dit";
+    // const password = "705224@Dit";
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/store/getKey`,
@@ -55,12 +58,14 @@ const KeyManagement = () => {
           headers: {
             "Content-Type": "application/json", // Set the content type to JSON
           },
-          body: JSON.stringify({ username, filename, password }),
+          body: JSON.stringify({ username, filename }),
         }
       );
 
       if (!res.ok) {
-        console.log("ERROR in saving");
+        const outputError = await res.json();
+        setError(outputError.error);
+        return;
       }
 
       const output = await res.json();
@@ -71,10 +76,8 @@ const KeyManagement = () => {
           idx === index ? { ...item, key } : item
         )
       );
-
-      console.log("Success in key : ", key);
     } catch (err) {
-      console.log("Error: ", err);
+      setError(err);
     }
   };
 
@@ -101,6 +104,13 @@ const KeyManagement = () => {
   return (
     <div className="flex flex-col items-center py-8">
       <h2 className="text-2xl font-semibold mb-4">Key Management</h2>
+      {error.length > 0 ? (
+        <div className="flex justify-center">
+          <span className="text-red-500 text-xl">{error}</span>
+        </div>
+      ) : (
+        <span></span>
+      )}
       <div className="w-2/3 overflow-x-auto mb-8">
         <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
           <thead className="bg-gray-800 text-white">
@@ -138,7 +148,7 @@ const KeyManagement = () => {
                         <strong>Copied...</strong>
                       ) : (
                         <ContentCopyIcon
-                          onClick={() => handleCopy(item.key,index)}
+                          onClick={() => handleCopy(item.key, index)}
                           className="icon cursor-pointer ml-2"
                         />
                       )}

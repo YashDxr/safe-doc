@@ -22,7 +22,6 @@ export default function InputType({ sendKey }) {
 
   useEffect(() => {
     if (key.length > 0) {
-      console.log("Sending key...");
       sendKey(key);
     }
   }, [key]);

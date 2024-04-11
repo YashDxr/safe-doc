@@ -19,6 +19,7 @@ export default function Files() {
   const [docFileUrl, setDocFileUrl] = useState("");
   const [copiedItem, setCopiedItem] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function Files() {
 
   const getFiles = async () => {
     setLoading(true);
+    setError("");
     const username = localStorage.getItem("user");
     try {
       const res = await fetch(
@@ -42,25 +44,26 @@ export default function Files() {
         }
       );
       if (!res.ok) {
-        console.log("Data error");
+        const outputError = await res.json();
+        setError(outputError.error);
+        return;
       }
       const data = await res.json();
-
-      console.log("1: ", data);
-      console.log("2: ", data.user);
-      console.log("3: ", data.user.files);
 
       setTimeout(() => {
         setFiles(data.user.files);
         setLoading(false);
       }, 1500);
     } catch (err) {
-      console.log(" Files Error: ", err);
+      setError(err);
       setLoading(false);
     }
   };
 
+  // ${import.meta.env.VITE_BACKEND_URL}/files/decrypt
+
   const viewFiles = async (filename) => {
+    setError("");
     const username = localStorage.getItem("user");
     try {
       const res = await fetch(
@@ -74,11 +77,12 @@ export default function Files() {
         }
       );
       if (!res.ok) {
-        console.log("Data error");
+        const output1Error = await res.json();
+        setError(output1Error.error);
+        return;
       }
       const data = await res.json();
       const { key } = data;
-      // console.log(key);
 
       const res2 = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/files/decrypt`,
@@ -92,8 +96,9 @@ export default function Files() {
       );
 
       if (!res2.ok) {
-        const errorMessage = await res2.text();
-        throw new Error(`Failed to decrypt file: ${errorMessage}`);
+        const output2Error = await res2.json();
+        setError(output2Error.error);
+        return;
       }
 
       // Parse the response body as binary data (PDF file)
@@ -103,11 +108,14 @@ export default function Files() {
       const fileUrl = URL.createObjectURL(blob);
       setDocFileUrl(fileUrl);
     } catch (err) {
-      console.log("Error Server");
+      setError(err);
     }
   };
 
-  const handleClick = (index, url) => {
+  const handleClick = (index, user, file) => {
+    const url = `${
+      import.meta.env.VITE_BACKEND_URL
+    }/files/decrypt/${user}/${file}`;
     setCopiedItem(index);
     navigator.clipboard.writeText(url);
     setTimeout(() => {
@@ -125,50 +133,87 @@ export default function Files() {
         </div>
       ) : (
         <div className="border border-black rounded-lg shadow-lg p-4 m-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {files.map((file, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-lg font-semibold mb-2">{file.filename}</h2>
-                <div className="flex justify-between items-center">
-                  <a
-                    onClick={() => viewFiles(file.filename)}
-                    className="mt-4 block text-blue-500 hover:underline cursor-pointer"
-                  >
-                    View File
-                  </a>
-                  <div className="flex items-center">
-                    {copiedItem === index ? (
-                      <div>Copied</div>
-                    ) : (
-                      <div
-                        className="mr-4 cursor-pointer"
-                        onClick={() => handleClick(index, docFileUrl)}
-                      >
-                        <ContentCopyIcon />
-                      </div>
-                    )}
+          {files.length === 0 ? (
+            <div>No Files yet!</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {files.map((file, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-md p-6">
+                  <h2 className="text-lg font-semibold mb-2">
+                    {file.filename}
+                  </h2>
+                  <div className="flex justify-between items-center">
+                    <a
+                      onClick={() => viewFiles(file.filename)}
+                      className="mt-4 block text-blue-500 hover:underline cursor-pointer"
+                    >
+                      View File
+                    </a>
+                    <div className="flex items-center">
+                      {copiedItem === index ? (
+                        <div>Copied</div>
+                      ) : (
+                        <div
+                          className="mr-4 cursor-pointer"
+                          onClick={() =>
+                            handleClick(
+                              index,
+                              localStorage.getItem("user"),
+                              file.filename
+                            )
+                          }
+                        >
+                          <ContentCopyIcon />
+                        </div>
+                      )}
 
-                    <div className="mr-4">
-                      <WhatsappShareButton url={docFileUrl}>
-                        <WhatsAppIcon />
-                      </WhatsappShareButton>
-                    </div>
-                    <div className="mr-4">
-                      <FacebookShareButton url={docFileUrl}>
-                        <FacebookIcon />
-                      </FacebookShareButton>
-                    </div>
-                    <div>
-                      <EmailShareButton url={docFileUrl}>
-                        <MailIcon />
-                      </EmailShareButton>
+                      <div className="mr-4">
+                        <WhatsappShareButton
+                          url={`${
+                            import.meta.env.VITE_BACKEND_URL
+                          }/files/decrypt/${localStorage.getItem("user")}/${
+                            file.filename
+                          }`}
+                        >
+                          <WhatsAppIcon />
+                        </WhatsappShareButton>
+                      </div>
+                      <div className="mr-4">
+                        <FacebookShareButton
+                          url={`${
+                            import.meta.env.VITE_BACKEND_URL
+                          }/files/decrypt/${localStorage.getItem("user")}/${
+                            file.filename
+                          }`}
+                        >
+                          <FacebookIcon />
+                        </FacebookShareButton>
+                      </div>
+                      <div>
+                        <EmailShareButton
+                          url={`${
+                            import.meta.env.VITE_BACKEND_URL
+                          }/files/decrypt/${localStorage.getItem("user")}/${
+                            file.filename
+                          }`}
+                        >
+                          <MailIcon />
+                        </EmailShareButton>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
+      )}
+      {error.length > 0 ? (
+        <div className="flex justify-center">
+          <span className="text-red-500 text-xl">{error}</span>
+        </div>
+      ) : (
+        <span></span>
       )}
       {docFileUrl && (
         <div

@@ -56,16 +56,6 @@ export default function Header() {
             <Box sx={{ flexGrow: 1 }} />
             <div className="md:flex md:items-center md:justify-end">
               <>
-                {/* <Button
-                onClick={() => handleNavigation("/decrypt")}
-                sx={{
-                  my: 1,
-                  color: "white",
-                  display: { xs: "none", md: "block" },
-                }}
-              >
-                Decrypt
-              </Button> */}
                 <Button
                   onClick={() => handleNavigation("/keystore")}
                   sx={{

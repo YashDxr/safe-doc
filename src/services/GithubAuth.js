@@ -6,6 +6,6 @@ export async function GithubAuth() {
   const userCredentials = await signInWithPopup(auth, provider);
   const user = userCredentials.user;
 
-  console.log("User: ", user);
+  // console.log("User: ", user);
   return user;
 }

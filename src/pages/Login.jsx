@@ -31,8 +31,6 @@ export default function Login() {
       );
 
       const output = await res.json();
-      console.log(output);
-      console.log(output.user.username);
       if (res.ok) {
         localStorage.setItem("user", output.user.username);
         setTimeout(() => {
@@ -48,7 +46,6 @@ export default function Login() {
     } catch (err) {
       setTimeout(() => {
         setLoading(false);
-        console.log(err);
         setError("Invalid Credentials");
       }, 3000);
     }
@@ -68,8 +65,8 @@ export default function Login() {
               Email
             </label>
             <input
-              id="email"
-              {...register("email")}
+              id="id"
+              {...register("id")}
               className="mt-1 w-full border-2 border-black rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-3"
               type="text"
             />
@@ -85,7 +82,9 @@ export default function Login() {
               type="password"
             />
           </div>
-          <div>{error && <p className="text-red-500">{error}</p>}</div>
+          <div className="flex justify-center">
+            {error && <p className="text-red-500 text-xl">{error}</p>}
+          </div>
           {loading ? (
             <button className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white  hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 my-2">
               <BarLoader color="#36d7b7" />
@@ -102,12 +101,15 @@ export default function Login() {
             </div>
           )}
         </form>
-        <a
-          className="flex justify-center cursor-pointer hover:underline text-indigo-800 hover:text-black"
-          onClick={handleRegister}
-        >
-          New user...?
-        </a>
+        <div className="flex justify-center">
+          <p className="mx-2">New user?</p>
+          <a
+            className="cursor-pointer hover:underline text-indigo-800 hover:text-black"
+            onClick={handleRegister}
+          >
+            Register
+          </a>
+        </div>
       </div>
     </div>
   );

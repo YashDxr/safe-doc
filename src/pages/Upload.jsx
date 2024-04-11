@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import InputType from "../components/InputType";
 import { useNavigate } from "react-router-dom";
-import BounceLoader from "react-spinners/BounceLoader";
 
 export default function Upload() {
   const [document, setDocument] = useState(null);
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [aesKey, setAesKey] = useState("");
+  const [error, setError] = useState(false);
   const nameRef = useRef();
   const navigate = useNavigate();
 
@@ -28,14 +28,11 @@ export default function Upload() {
     e.preventDefault();
     setLoading(true);
     if (!document || !name || aesKey.length < 32) {
-      // alert("Please provide all necessary information.");
-      if (!document) console.log("Doc");
-      else if (!name) console.log("Name");
-      else console.log("Key");
+      alert("Please provide all necessary information.");
+      setLoading(false);
       return;
     }
 
-    console.log("Key : ", aesKey.length);
     const user = localStorage.getItem("user");
     try {
       const formData = new FormData();
@@ -53,10 +50,11 @@ export default function Upload() {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to upload file");
+        const error1Output = await response.json();
+        setError(error1Output.error);
+        setLoading(false);
+        return;
       }
-
-      console.log("File uploaded and encrypted successfully");
 
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/store/save`,
@@ -70,19 +68,14 @@ export default function Upload() {
       );
 
       if (!res.ok) {
-        console.log("ERROR in saving");
+        const error2Output = await res.json();
+        setError(error2Output.error);
+        setLoading(false);
+        return;
       }
 
       setLoading(false);
       alert("File uploaded successfully!");
-      console.log("Success in saving: ", res);
-
-      // const blob = await response.blob();
-
-      // // Create a URL for the blob data
-      // const fileUrl = URL.createObjectURL(blob);
-
-      // window.open(fileUrl, "_blank");
     } catch (error) {
       console.error("Error:", error.message);
       setLoading(false);
@@ -137,11 +130,17 @@ export default function Upload() {
           </div>
         </div>
 
+        {error.length > 0 ? (
+          <div className="flex justify-center">
+            <span className="text-red-500 text-xl">{error}</span>
+          </div>
+        ) : (
+          <span></span>
+        )}
+
         {loading ? (
           <div className="flex justify-center">
-            <button
-              className="bg-blue-500  text-white py-4 px-8 rounded-md hover:bg-blue-600 transition duration-300"
-            >
+            <button className="bg-blue-500  text-white py-4 px-8 rounded-md hover:bg-blue-600 transition duration-300">
               Loading...
             </button>
           </div>

@@ -11,6 +11,7 @@ export default function Verification() {
   const [loadingOtp, setLoadingOtp] = useState(false);
   const [loadingVerification, setLoadingVerification] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   // useEffect(() => {
@@ -22,6 +23,7 @@ export default function Verification() {
   const handleverifyUser = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     const username = localStorage.getItem("user");
     try {
       const res = await fetch(
@@ -43,15 +45,19 @@ export default function Verification() {
           setLoading(false);
         }, 2000);
       } else {
-        console.log("Error:", res.statusText);
+        const errorOutput = await res.json();
+        setError(errorOutput.error);
+        setLoading(false);
       }
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      setError(error);
     }
   };
 
   const handleverifyOtp = async (e) => {
     e.preventDefault();
+    setError("");
     setLoadingVerification(true);
     const username = localStorage.getItem("user");
     try {
@@ -65,26 +71,26 @@ export default function Verification() {
           body: JSON.stringify({ username, otp }),
         }
       );
-      console.log("RES: ", res);
       if (res.ok) {
-        console.log("Success: ", res);
         localStorage.setItem("verified", true);
         setTimeout(() => {
           setLoadingVerification(false);
           navigate("/keystore");
         }, 1500);
       } else {
-        console.log("Error: ", res);
         setLoadingVerification(false);
-        // console.log("Error:", res.statusText);
+        const outputError = await res.json();
+        setError(outputError.error);
       }
     } catch (error) {
-      console.log(error);
+      setLoadingVerification(false);
+      setError(error);
     }
   };
 
   const handleGenerateOtp = async (e) => {
     e.preventDefault();
+    setError("");
     try {
       setLoadingOtp(true);
       const res = await fetch(
@@ -98,10 +104,13 @@ export default function Verification() {
         setMessage("OTP sent successfully. Please check your email.");
         setOtpBox(true);
       } else {
-        console.log("Error:", res.statusText);
+        setLoadingOtp(false);
+        const outputError = await res.json();
+        setError(outputError.error);
       }
     } catch (error) {
-      console.log(error);
+      setLoadingOtp(false);
+      setError(error);
     }
   };
 
@@ -196,6 +205,13 @@ export default function Verification() {
           )}
         </form>
       </div>
+      {error.length > 0 ? (
+        <div className="flex justify-center">
+          <span className="text-red-500 text-xl">{error}</span>
+        </div>
+      ) : (
+        <span></span>
+      )}
     </div>
   );
 }

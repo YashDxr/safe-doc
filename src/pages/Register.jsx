@@ -12,10 +12,12 @@ export default function Register() {
     getValues,
   } = useForm();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const onSubmit = async (formData) => {
     setLoading(true);
+    setError("");
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/auth/signup`,
@@ -28,15 +30,20 @@ export default function Register() {
         }
       );
 
-      const output = await res.json();
-      console.log(output);
+      if (!res.ok) {
+        const errorOutput = await res.json();
+        setError(errorOutput.error);
+        setLoading(false);
+        return;
+      }
       setTimeout(() => {
         setLoading(false);
         alert("Registration Successful. Please log in to continue...");
         navigate("/login");
-      }, 3000);
+      }, 1500);
     } catch (err) {
-      console.log("Error", err);
+      setError(err);
+      setLoading(false);
     }
   };
 
@@ -162,13 +169,23 @@ export default function Register() {
               <Auth />
             </div>
           )}
+          {error.length > 0 ? (
+            <div className="flex justify-center">
+              <span className="text-red-500 text-xl">{error}</span>
+            </div>
+          ) : (
+            <span></span>
+          )}
         </form>
-        <a
-          className="flex justify-center cursor-pointer hover:underline text-indigo-800 hover:text-black"
-          onClick={handleLogin}
-        >
-          Existing user...?
-        </a>
+        <div className="flex justify-center">
+          <p className="mx-2">Existing user?</p>
+          <a
+            className="cursor-pointer hover:underline text-indigo-800 hover:text-black"
+            onClick={handleLogin}
+          >
+            Login
+          </a>
+        </div>
       </div>
     </div>
   );
