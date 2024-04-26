@@ -35,6 +35,10 @@ export default function Header() {
     }, 3000);
   };
 
+  const handleDownloadClick = () => {
+    window.open("/download", "_blank");
+  };
+
   return (
     <AppBar position="static">
       {loading ? (
@@ -87,7 +91,8 @@ export default function Header() {
                   Upload
                 </Button>
                 <Button
-                  onClick={() => handleNavigation("/download")}
+                  // onClick={() => handleNavigation("/download")}
+                  onClick={handleDownloadClick}
                   sx={{
                     my: 1,
                     color: "white",
